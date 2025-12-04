@@ -556,6 +556,21 @@
             transition: transform 1500ms ease-out, opacity 1500ms ease-out;
         }
 
+        /* Arbeidstekort badge */
+        .work-shortage-badge {
+            position: absolute;
+            right: -6px;
+            top: -6px;
+            background: rgba(255,80,80,0.95);
+            color: white;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+            z-index: 40;
+        }
+
         /* Pas animaties toe op de auto's */
         .car-1 {
             top: 510px;
@@ -744,6 +759,11 @@
                 class="resource-bar text-sm font-bold text-gray-700 bg-gray-100 px-3 py-1 rounded-xl shadow-inner"
                 title="Afval (Productie / Capaciteit)">
                 🗑️ 0 / 0
+            </div>
+            <div id="workers-stats"
+                class="resource-bar text-sm font-bold text-gray-700 bg-gray-100 px-3 py-1 rounded-xl shadow-inner"
+                title="Arbeiders (Beschikbaar / Benodigd)">
+                👷 0 / 0
             </div>
         </div>
 
@@ -1205,6 +1225,7 @@
             powerStatsDisplay: document.getElementById('power-stats'),
             waterStatsDisplay: document.getElementById('water-stats'),
             wasteStatsDisplay: document.getElementById('waste-stats'),
+            workersStatsDisplay: document.getElementById('workers-stats'),
             buildTabsContainer: document.getElementById('build-tabs'),
             buildPanelsContainer: document.getElementById('build-panels'),
             boardContainer: document.getElementById('board-container'),
@@ -1308,6 +1329,7 @@
 
             renderBoard: () => {
                 DOM.board.querySelectorAll('.slot').forEach(slot => slot.remove());
+                const stats = GameLogic.calculateStats();
                 const allResourcesOK = GameLogic.areAllResourcesOK();
                 const resources = GameState;
 
@@ -1356,6 +1378,28 @@
                                 if (emergency.type === 'fire') {
                                     // spawn some smoke particles immediately
                                     ParticleManager.spawnSmokeAt(data.id, 3);
+                                }
+                            }
+
+                            // --- Arbeids-visuals ---
+                            // Huizen tonen soms ZZZ 's nachts
+                            if (building.category === 'woning') {
+                                if (GameState.currentDayTime !== 'day' && Math.random() < 0.12) {
+                                    ParticleManager.spawnZzzAt(data.id);
+                                }
+                            }
+
+                            // Fabrieken / commercie: rook/tandwiel wanneer actief, of waarschuwing bij arbeidstekort
+                            if (['commercieel', 'industrie'].includes(building.category)) {
+                                if (GameState.currentDayTime === 'day' && stats.employmentRatio >= 1 && Math.random() < 0.06) {
+                                    ParticleManager.spawnSmokeAt(data.id, 1);
+                                }
+                                if (stats.employmentRatio < 1) {
+                                    const badge = document.createElement('div');
+                                    badge.className = 'work-shortage-badge';
+                                    badge.textContent = '⚠️';
+                                    slot.appendChild(badge);
+                                    slot.style.opacity = '0.7';
                                 }
                             }
                         }
@@ -1482,9 +1526,17 @@
             },
 
             updateBuildMenuAffordability: () => {
-                // Her-render het menu om locks te updaten en betaalbaarheid te checken
-                // (Iets zwaarder, maar zorgt dat locks correct verdwijnen bij level up)
-                UIManager.renderBuildMenu(); 
+                // Update alleen betaalbaarheid van bestaande knoppen zonder het menu te her-renderen
+                // zodat de actieve tab niet terugkeert naar de eerste categorie.
+                DOM.buildPanelsContainer.querySelectorAll('.building-button').forEach(btn => {
+                    const type = btn.dataset.type;
+                    const building = BuildingTypes[type];
+                    if (!building) return;
+                    const isLocked = GameState.level < building.unlockLevel;
+                    btn.disabled = isLocked || (GameState.saldo < (building.cost || 0));
+                    // Update visual locked state
+                    if (isLocked) btn.classList.add('locked'); else btn.classList.remove('locked');
+                });
                 // Restore highlight
                 UIManager.updateBuildMenuHighlights();
             },
@@ -1533,6 +1585,11 @@
                 DOM.wasteStatsDisplay.textContent = `🗑️ ${waste.usage} / ${waste.capacity}`;
                 DOM.wasteStatsDisplay.classList.toggle('over-capacity', waste.usage > waste.capacity);
                 
+                // Arbeiders statistieken
+                const stats = GameLogic.calculateStats();
+                DOM.workersStatsDisplay.textContent = `👷 ${stats.workersSupply} / ${stats.workersDemand} (${Math.round(stats.employmentRatio*100)}%)`;
+                DOM.workersStatsDisplay.classList.toggle('over-capacity', stats.workersSupply < stats.workersDemand);
+
                 // Ook Level UI updaten hier
                 UIManager.updateLevelUI();
             },
@@ -1646,6 +1703,14 @@
                         <button onclick="GameLogic.exportGame()" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-xl">Exporteer Save</button>
                         <label class="w-full text-center block bg-green-600 text-white font-bold py-3 px-4 rounded-xl cursor-pointer">Importeer Save <input type="file" style="display:none" onchange="GameLogic.handleFileImport(event)"></label>
                         <button onclick="GameLogic.resetGame()" class="w-full bg-red-600 text-white font-bold py-3 px-4 rounded-xl">Reset Spel</button>
+
+                        <hr class="my-3">
+                        <div class="p-3 bg-white rounded-lg border">
+                            <h3 class="text-xl font-bold mb-2">Spel Informatie</h3>
+                            <p><strong>Versie:</strong> v0.0.1</p>
+                            <p><strong>Laatste Update:</strong> 4-12-2025</p>
+                            <p class="mt-2">Beta Builder’s Village door Boris de Bruin.</p>
+                        </div>
                     </div>`;
             },
 
@@ -1803,30 +1868,50 @@
                     if (b) maintenanceTotal += Math.max(1, Math.floor((b.cost || 0) * GameSettings.MAINTENANCE_RATE));
                 }
 
-                // --- NIEUW: Arbeiders-systeem (eenvoudig) ---
-                // Arbeiders worden geleverd door woningen (population). Andere gebouwen (industrie/commercieel/publiek/entertainment/voorziening)
-                // vragen een vaste hoeveelheid arbeiders per gebouw. Als er te weinig arbeiders zijn, vermindert de inkomsten proportioneel.
-                let workersSupply = totalPopulation;
+                // --- NIEUW: Arbeiders-systeem (eenvoudig maar functioneel) ---
+                // Huizen genereren arbeiders. Commercie/industrie/voorziening verbruiken arbeiders.
+                // Als er te weinig arbeiders zijn -> gebouwen draaien op verminderde efficiëntie.
+                let workersSupply = 0;
                 const workerDemandCategories = ['industrie', 'commercieel', 'voorziening', 'publiek', 'entertainment'];
                 let workersDemand = 0;
+
                 for (const slotId in GameState.placedSlots) {
                     const b = BuildingTypes[GameState.placedSlots[slotId]];
                     if (!b) continue;
+
+                    // Woning genereert een vaste hoeveelheid arbeiders (2-4 per woning, afhankelijk op grootte)
+                    if (b.category === 'woning') {
+                        // Bepaal gegenereerde arbeiders op basis van population: schaal en clamp tussen 2 en 4
+                        const gen = Math.min(4, Math.max(2, Math.round((b.population || 5) / 6)));
+                        workersSupply += gen;
+                    }
+
+                    // Vraag: commercie/industrie en andere werkende gebouwen
                     if (workerDemandCategories.includes(b.category)) {
-                        // Simpele regel: eis ~5 arbeiders per commerciële/industriële gebouw, + extra voor grotere inkomsten
-                        workersDemand += 5 + Math.floor((b.income || 0) / 2000);
+                        // Basis vraag per gebouw (kan later per-type worden verfijnd)
+                        const baseDemand = 5;
+                        const scaleDemand = Math.floor((b.income || 0) / 2000);
+                        workersDemand += baseDemand + scaleDemand;
                     }
                 }
+
                 const employmentRatio = workersDemand === 0 ? 1 : Math.min(1, workersSupply / workersDemand);
 
-                // Netto inkomsten: afhankelijk van resources, geluk, employment en onderhoud
-                let grossIncome = totalIncome * employmentRatio;
+                // Werk-efficiëntie: bij tekort valt efficiency terug naar minimaal 50%, lineair omhoog naar 100%
+                const workforceEfficiency = employmentRatio >= 1 ? 1 : (0.5 + 0.5 * employmentRatio);
+
+                // Dag/Nacht effect op productie (nacht verlaagt activiteit)
+                const dayMultiplier = (GameState.currentDayTime === 'day') ? 1 : 0.3;
+
+                // Netto inkomsten: afhankelijk van resources, geluk, onderhoud, workforce efficiency en dag/nacht
+                let grossIncome = totalIncome * workforceEfficiency * dayMultiplier;
                 let netEarned = 0;
                 if (allResourcesOK && GameState.happiness > 0) netEarned = grossIncome * (GameState.happiness / 100) - maintenanceTotal;
 
-                // Happiness penalty if many workers are unemployed
+                // Geluk penalty als veel bewoners werkloos zijn (schaalt met tekort)
                 if (employmentRatio < 1) {
-                    happinessChange += Math.floor((employmentRatio - 1) * 10); // negative
+                    // Negatieve geluk verandering proportioneel aan het tekort
+                    happinessChange += Math.floor((employmentRatio - 1) * 10);
                 }
 
                 // --- NIEUW: Pas beleidsopties toe ---
@@ -1869,11 +1954,7 @@
                 const { canPlace, reason } = GameLogic.checkPlacementResourceViability(building);
                 if (!canPlace) { UIManager.showMessage(reason, 'error'); return; }
 
-                // Vereis weg-connectie voor de meeste gebouwen (niet voor parken/vermaak)
-                if (building.category !== 'vermaak' && !GameLogic.isSlotConnectedToRoad(slotId)) {
-                    UIManager.showMessage('Gebouw moet verbonden zijn met een weg!', 'error');
-                    return;
-                }
+                // (Weg-connectie controle verwijderd zoals gevraagd)
 
                 GameState.saldo -= building.cost;
                 GameState.placedSlots[slotId] = type;
@@ -2224,5 +2305,4 @@
 
     </script>
 </body>
-
 </html>
