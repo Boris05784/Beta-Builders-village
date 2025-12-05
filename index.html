@@ -673,7 +673,7 @@
             <h1 class="text-6xl font-extrabold mb-4">🏗️ Builder’s Village</h1>
 
             <p class="text-xl mb-6">
-                Welkom, Burgemeester! 🌆
+                Welkom, <strong>Burgemeester <span id="mayor-name">Burgemeester</span></strong>! 🌆
                 Bouw je dorp, verdien XP, en unlock nieuwe gebouwen.
             </p>
 
@@ -752,6 +752,7 @@
             <div class="flex flex-col bg-purple-50 px-4 py-1 rounded-xl shadow-inner border border-purple-100 min-w-[180px]">
                 <div class="flex justify-between items-center w-full mb-1">
                      <span class="font-bold text-purple-800 text-sm">LEVEL <span id="level-display" class="text-lg">1</span></span>
+                     <div id="mayor-display" class="text-sm text-purple-700 font-semibold mt-1">Burgemeester: <span id="mayor-display-name">Burgemeester</span></div>
                      <span id="xp-text" class="text-xs text-purple-600 font-semibold">0 / 1000 XP</span>
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
@@ -1257,6 +1258,8 @@
             driveKeys: { up: false, down: false, left: false, right: false },
             // --- Loans state ---
             loans: [], // each loan: {id, principal, ratePct, ticksRemaining, perTick, totalRepay, originalTicks}
+            // --- Player name ---
+            playerName: 'Burgemeester',
             // ----------------------------------
 
             placedSlots: {},
@@ -1323,7 +1326,7 @@
                     GameState.isGameStarted = true;
                     GameLogic.initAudio();
                     GameLogic.startGameLoop();
-                    UIManager.showMessage('Welkom, Burgemeester! Bouw om XP te verdienen.', 'info');
+                    UIManager.showMessage(`Welkom, Burgemeester ${GameState.playerName}! Bouw om XP te verdienen.`, 'info');
                     UIManager.centerMap();
                 });
             },
@@ -1656,6 +1659,22 @@
                 DOM.xpText.textContent = `${Math.floor(GameState.xp)} / ${Math.floor(GameState.nextLevelXp)} XP`;
             },
 
+            updatePlayerNameUI: () => {
+                const mayorSpan = document.getElementById('mayor-name');
+                const mayorDisplay = document.getElementById('mayor-display-name');
+                if (mayorSpan) mayorSpan.textContent = GameState.playerName || 'Burgemeester';
+                if (mayorDisplay) mayorDisplay.textContent = GameState.playerName || 'Burgemeester';
+            },
+
+            setPlayerName: (name) => {
+                const n = (String(name || '')).trim();
+                if (!n) return UIManager.showMessage('Ongeldige naam.', 'error');
+                GameState.playerName = n;
+                UIManager.updatePlayerNameUI();
+                GameLogic.saveGame();
+                UIManager.showMessage(`Naam bijgewerkt: Burgemeester ${n}`, 'info');
+            },
+
             updateResourceStats: () => {
                 const { power, water, waste } = GameState;
                 DOM.powerStatsDisplay.textContent = `⚡️ ${power.usage} / ${power.capacity}`;
@@ -1836,6 +1855,14 @@
                             <p class="font-bold text-purple-800 text-lg">Huidig Level: ${GameState.level}</p>
                             <p class="text-sm text-purple-600">XP: ${Math.floor(GameState.xp)} / ${Math.floor(GameState.nextLevelXp)}</p>
                         </div>
+                        <div class="p-3 bg-white rounded-lg border">
+                            <h3 class="font-semibold mb-2">Persoonlijke Instellingen</h3>
+                            <label class="text-xs text-gray-600">Naam burgemeester</label>
+                            <div class="flex gap-2 mt-2">
+                                <input id="mayor-name-input" type="text" class="p-2 border rounded flex-1" value="${GameState.playerName || 'Burgemeester'}">
+                                <button onclick="UIManager.setPlayerName(document.getElementById('mayor-name-input').value)" class="bg-indigo-600 text-white px-3 py-2 rounded">Opslaan</button>
+                            </div>
+                        </div>
                         <div class="p-2 bg-gray-50 rounded-lg">
                             <h3 class="font-bold mb-2">Beleidsopties</h3>
                             <div class="space-y-2">${policies}</div>
@@ -1846,7 +1873,7 @@
 
                     <div class="p-4 bg-gray-50 rounded-lg border mb-6">
                         <h3 class="text-xl font-semibold text-gray-800 mb-2">Spel Informatie</h3>
-                        <p class="text-gray-700"><strong>Versie:</strong> v0.0.3</p>
+                        <p class="text-gray-700"><strong>Versie:</strong> v0.0.7</p>
                         <p class="text-gray-700"><strong>Laatste Update:</strong> 5-12-2025</p>
                         <p class="text-gray-700"><strong>📅 Publicatiedatum: 4-12-2025</p>
                         <p class="text-sm text-gray-500 mt-2">Builder’s Village door Boris de Bruin.</p>
@@ -2296,7 +2323,8 @@
                     level: GameState.level, xp: GameState.xp, nextLevelXp: GameState.nextLevelXp, // Save levels
                     activeEmergencies: GameState.activeEmergencies,
                     policies: GameState.policies || {},
-                    loans: GameState.loans || []
+                        loans: GameState.loans || [],
+                        playerName: GameState.playerName || 'Burgemeester'
                 };
                 localStorage.setItem(GameSettings.SAVE_KEY, JSON.stringify(data));
             },
@@ -2315,6 +2343,7 @@
                     GameState.policies = data.policies || {};
                     GameState.activeEmergencies = (data.activeEmergencies || []).filter(e => GameState.placedSlots[e.slotId]);
                     GameState.loans = data.loans || [];
+                    GameState.playerName = data.playerName || GameState.playerName || 'Burgemeester';
                 }
             },
             
@@ -2663,6 +2692,7 @@
             UIManager.initStartScherm();
             UIManager.initMapDrag();
             UIManager.initControls();
+            UIManager.updatePlayerNameUI();
             window.UIManager = UIManager; window.GameLogic = GameLogic; window.EmergencyManager = EmergencyManager; window.CarController = CarController;
         });
 
