@@ -1,5 +1,6 @@
 
 
+
 <!-- Builders village by Boris de Bruin -->
 <!DOCTYPE html>
 <html lang="nl">
@@ -59,8 +60,8 @@
         #board {
             position: absolute;
             /* Essentieel voor pannen */
-            width: 2500px;
-            height: 2000px;
+            width: 3500px;
+            height: 2600px;
             background-color: transparent;
             /* De container heeft nu de achtergrondkleur */
             transform-origin: 0 0;
@@ -251,6 +252,29 @@
             transform: scale(1.05);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
             z-index: 10;
+        }
+
+        /* Intersection slot styling - only traffic lights allowed */
+        .slot.intersection-slot {
+            border-color: #16a34a;
+            background-color: rgba(16,163,127,0.06);
+        }
+        .slot.intersection-slot::after {
+            content: '🚦';
+            position: absolute;
+            right: -8px;
+            top: -8px;
+            font-size: 1.1rem;
+            background: #16a34a;
+            color: white;
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9999px;
+            box-shadow: 0 0 6px rgba(16,163,127,0.6);
+            z-index: 22;
         }
 
         /* Level badge op een gebouw */
@@ -480,15 +504,15 @@
             }
 
             to {
-                transform: translateX(2550px) rotateY(0deg);
+                transform: translateX(3550px) rotateY(0deg);
             }
 
-            /* 2500px map + 50px */
+            /* 3500px map + 50px */
         }
 
         @keyframes drive-horizontal-rtl {
             from {
-                transform: translateX(2550px) rotateY(180deg);
+                transform: translateX(3550px) rotateY(180deg);
             }
 
             to {
@@ -502,15 +526,15 @@
             }
 
             to {
-                transform: translateY(2050px) translateZ(0);
+                transform: translateY(2650px) translateZ(0);
             }
 
-            /* 2000px map + 50px */
+            /* 2600px map + 50px */
         }
 
         @keyframes drive-vertical-btt {
             from {
-                transform: translateY(2050px) translateZ(0);
+                transform: translateY(2650px) translateZ(0);
             }
 
             to {
@@ -608,13 +632,13 @@
             }
 
             to {
-                transform: translateX(2550px) rotateY(0deg);
+                transform: translateX(3550px) rotateY(0deg);
             }
         }
 
         @keyframes drive-horizontal-rtl {
             from {
-                transform: translateX(2550px) rotateY(180deg);
+                transform: translateX(3550px) rotateY(180deg);
             }
 
             to {
@@ -628,13 +652,13 @@
             }
 
             to {
-                transform: translateY(2050px) translateZ(0);
+                transform: translateY(2650px) translateZ(0);
             }
         }
 
         @keyframes drive-vertical-btt {
             from {
-                transform: translateY(2050px) translateZ(0);
+                transform: translateY(2650px) translateZ(0);
             }
 
             to {
@@ -830,22 +854,22 @@
         <!-- HET SPELBORD (nu groter en absoluut gepositioneerd) -->
         <div id="board">
             <!-- Wegen (Pixel-based) -->
-            <div class="road vertical" style="left: 600px; top: 0; width: 64px; height: 2000px;"></div>
-            <div class="road vertical" style="left: 1800px; top: 0; width: 64px; height: 2000px;"></div>
-            <div class="road horizontal" style="left: 0; top: 500px; width: 2500px; height: 64px;"></div>
-            <div class="road horizontal" style="left: 0; top: 1200px; width: 2500px; height: 64px;"></div>
+            <div class="road vertical" style="left: 600px; top: 0; width: 64px; height: 2600px;"></div>
+            <div class="road vertical" style="left: 1800px; top: 0; width: 64px; height: 2600px;"></div>
+            <div class="road horizontal" style="left: 0; top: 500px; width: 3500px; height: 64px;"></div>
+            <div class="road horizontal" style="left: 0; top: 1200px; width: 3500px; height: 64px;"></div>
 
             <!-- NIEUWE WEGEN HIERTOEGEVOEGD -->
-            <div class="road vertical" style="left: 1200px; top: 0; width: 64px; height: 2000px;"></div>
-            <div class="road horizontal" style="left: 0; top: 900px; width: 2500px; height: 64px;"></div>
-            <div class="road horizontal" style="left: 0; top: 1700px; width: 2500px; height: 64px;"></div>
+            <div class="road vertical" style="left: 1200px; top: 0; width: 64px; height: 2600px;"></div>
+            <div class="road horizontal" style="left: 0; top: 900px; width: 3500px; height: 64px;"></div>
+            <div class="road horizontal" style="left: 0; top: 1700px; width: 3500px; height: 64px;"></div>
 
             <!-- MEER NIEUWE WEGEN TOEGEVOEGD -->
-            <div class="road vertical" style="left: 900px; top: 0; width: 64px; height: 2000px;"></div>
-            <div class="road vertical" style="left: 1500px; top: 0; width: 64px; height: 2000px;"></div>
-            <div class="road horizontal" style="left: 0; top: 250px; width: 2500px; height: 64px;"></div>
-            <div class="road horizontal" style="left: 0; top: 700px; width: 2500px; height: 64px;"></div>
-            <div class="road horizontal" style="left: 0; top: 1450px; width: 2500px; height: 64px;"></div>
+            <div class="road vertical" style="left: 900px; top: 0; width: 64px; height: 2600px;"></div>
+            <div class="road vertical" style="left: 1500px; top: 0; width: 64px; height: 2600px;"></div>
+            <div class="road horizontal" style="left: 0; top: 250px; width: 3500px; height: 64px;"></div>
+            <div class="road horizontal" style="left: 0; top: 700px; width: 3500px; height: 64px;"></div>
+            <div class="road horizontal" style="left: 0; top: 1450px; width: 3500px; height: 64px;"></div>
 
             <!-- Geanimeerde Auto's -->
             <div class="car car-1">🚗</div>
@@ -1049,6 +1073,9 @@
             'small_solar_1': { name: 'Dakpaneleiland', description: 'Levert 25 Stroom.', cost: 6000, emoji: '🔆', category: 'voorziening', happinessEffect: 1, income: 0, population: 0, upgradeTo: 'small_solar_2', powerUsage: 0, waterUsage: 0, wasteProduction: 0, powerCapacity: 25, waterCapacity: 0, wasteCapacity: 0, serviceType: null, unlockLevel: 8 },
             'small_solar_2': { name: 'Zonnedakpark', description: 'Levert 120 Stroom.', cost: 20000, emoji: '🌞', category: 'voorziening', happinessEffect: 3, income: 0, population: 0, upgradeTo: null, powerUsage: 0, waterUsage: 0, wasteProduction: 0, powerCapacity: 120, waterCapacity: 0, wasteCapacity: 0, serviceType: null, unlockLevel: 10 },
             'water_pump_1': { name: 'Pompstation', description: 'Levert 120 Water.', cost: 4200, emoji: '🔧💧', category: 'voorziening', happinessEffect: 0, income: 0, population: 0, upgradeTo: null, powerUsage: 6, waterUsage: 0, wasteProduction: 1, powerCapacity: 0, waterCapacity: 120, wasteCapacity: 0, serviceType: null, unlockLevel: 10 },
+            
+            // --- NIEUW: Verkeerslicht ---
+            'traffic_light_1': { name: 'Verkeerslicht', description: 'Plaats op kruispunten om hulpvoertuigen te versnellen.', cost: 1200, emoji: '🚦', category: 'voorziening', happinessEffect: 0, income: 0, population: 0, upgradeTo: null, powerUsage: 1, waterUsage: 0, wasteProduction: 0, powerCapacity: 0, waterCapacity: 0, wasteCapacity: 0, serviceType: null, unlockLevel: 2, maintenancePerTick: 3 },
 
 
             // --- Entertainment ---
@@ -1193,6 +1220,15 @@
              // Blok 8 (Rij 8 - Dubbel)
              addBlock(191, 100, 1800, 5, 2); addBlock(201, 700, 1800, 2, 2); addBlock(205, 1000, 1800, 2, 2);
              addBlock(209, 1300, 1800, 2, 2); addBlock(213, 1600, 1800, 2, 2); addBlock(217, 1900, 1800, 6, 2);
+             // Uitbreiding: vul rechterkant en extra rijen voor grotere kaart
+             const extraXs = [2100, 2400, 2700, 3000];
+             const extraYs = [100, 350, 600, 800, 1000, 1300, 1550, 1800, 2050, 2300];
+             for (const y of extraYs) {
+                 for (const x of extraXs) {
+                     // 2 kolommen per extra x (kleine cluster)
+                     addBlock(0, x, y, 2, 1);
+                 }
+             }
              return list;
         };
         const ActualSlotsData = generateOriginalGrid();
@@ -1220,6 +1256,7 @@
             EMERGENCY_CHANCE_PER_TICK: 0.05,
             EMERGENCY_DURATION_TICKS: 15,
             EMERGENCY_VEHICLE_SPEED_MS: 5000,
+            MAX_LEVEL: 10,
             // Nieuw: jaarlijks onderhoud (per-tick) als percentage van gebouwkosten
             MAINTENANCE_RATE: 0.001, // 0.1% van kosten per tick
         };
@@ -1443,6 +1480,12 @@
                     slot.style.zIndex = '20';
 
                     const buildingType = GameState.placedSlots[data.id];
+                    // mark intersection slots visually and in dataset
+                    try {
+                        const isIntersection = GameLogic.isSlotIntersection(data.id);
+                        if (isIntersection) { slot.classList.add('intersection-slot'); slot.dataset.intersection = '1'; }
+                        else slot.dataset.intersection = '0';
+                    } catch (e) { slot.dataset.intersection = '0'; }
                     if (buildingType) {
                         const building = BuildingTypes[buildingType];
                         if (building) {
@@ -1536,6 +1579,9 @@
                     const panel = DOM.buildPanelsContainer.querySelector(`#panel-${categoryId}`);
                     Object.keys(BuildingTypes).forEach(type => {
                         const building = BuildingTypes[type];
+                        if (!building) return;
+                        // Hide buildings that would only unlock above MAX_LEVEL
+                        if ((building.unlockLevel || 1) > GameSettings.MAX_LEVEL) return;
                         const isBaseBuilding = type.endsWith('_1') || (!type.includes('_') && !Object.values(BuildingTypes).some(b => b.upgradeTo === type));
                         if (building.category === categoryId && isBaseBuilding) {
                             const button = UIManager.createBuildingButton(type);
@@ -1551,7 +1597,7 @@
                 const button = document.createElement('button');
                 
                 // --- NIEUW: Lock Logica ---
-                const isLocked = GameState.level < building.unlockLevel;
+                const isLocked = (building.unlockLevel || 1) > GameSettings.MAX_LEVEL || GameState.level < building.unlockLevel;
 
                 button.className = `building-button font-bold py-2 px-4 rounded-xl shadow-md transition-all duration-200 w-40 h-24 flex flex-col items-center justify-center text-center ${isLocked ? 'locked' : (GameState.saldo >= building.cost ? 'bg-blue-500 hover:bg-blue-700 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed')}`;
                 button.dataset.type = type;
@@ -1890,30 +1936,211 @@
 
                     <div class="p-4 bg-gray-50 rounded-lg border mb-6">
                         <h3 class="text-xl font-semibold text-gray-800 mb-2">Spel Informatie</h3>
-                        <p class="text-gray-700"><strong>Versie:</strong> v1.1.7</p>
-                        <p class="text-gray-700"><strong>Laatste Update:</strong> 5-12-2025</p>
+                        <p class="text-gray-700"><strong>Versie:</strong> v1.2.7</p>
+                        <p class="text-gray-700"><strong>Laatste Update:</strong> 9-12-2025</p>
                         <p class="text-gray-700"><strong>📅 Publicatiedatum: 4-12-2025</p>
                         <p class="text-sm text-gray-500 mt-2">Builder’s Village door Boris de Bruin.</p>
                     </div>
                     </div>`;
             },
 
-            animateVehicle: (fromSlotId, toSlotId, type) => {
+            animateVehicle: (fromSlotId, toSlotId, type, speedMs) => {
+                // Create vehicle element
                 const vehicle = document.createElement('div');
                 vehicle.className = 'emergency-vehicle';
                 vehicle.textContent = EmergencyManager.emojiMap[type] || '🚨';
                 const fData = ActualSlotsData.find(s => s.id === fromSlotId);
                 const tData = ActualSlotsData.find(s => s.id === toSlotId);
-                if (!fData || !tData) return;
+                if (!fData || !tData) return false;
 
-                const fX = parseInt(fData.left)+40, fY = parseInt(fData.top)+40;
-                const tX = parseInt(tData.left)+40, tY = parseInt(tData.top)+40;
+                const fX = parseInt(fData.left, 10) + 40, fY = parseInt(fData.top, 10) + 40;
+                const tX = parseInt(tData.left, 10) + 40, tY = parseInt(tData.top, 10) + 40;
                 vehicle.style.left = `${fX}px`; vehicle.style.top = `${fY}px`;
                 DOM.board.appendChild(vehicle);
                 GameState.sfx.siren?.triggerAttackRelease('A5', '1n');
 
-                const anim = vehicle.animate([{ transform: `translate(0,0)` }, { transform: `translate(${tX-fX}px, ${tY-fY}px)` }], { duration: GameSettings.EMERGENCY_VEHICLE_SPEED_MS, easing: 'ease-in-out' });
-                anim.onfinish = () => { EmergencyManager.resolveEmergency(toSlotId, type); vehicle.remove(); };
+                // Build a simple grid-based passable map from roads
+                const cellSize = 20;
+                const boardW = DOM.board.clientWidth || 3500;
+                const boardH = DOM.board.clientHeight || 2600;
+                const cols = Math.ceil(boardW / cellSize);
+                const rows = Math.ceil(boardH / cellSize);
+
+                // Precompute road rects relative to board
+                const boardRect = DOM.board.getBoundingClientRect();
+                const roadRects = Array.from(DOM.board.querySelectorAll('.road')).map(r => {
+                    const rr = r.getBoundingClientRect();
+                    return {
+                        left: Math.max(0, rr.left - boardRect.left),
+                        top: Math.max(0, rr.top - boardRect.top),
+                        right: Math.min(boardW, rr.left - boardRect.left + rr.width),
+                        bottom: Math.min(boardH, rr.top - boardRect.top + rr.height)
+                    };
+                });
+
+                const isRoadCell = (cx, cy) => {
+                    const x = cx * cellSize + cellSize / 2;
+                    const y = cy * cellSize + cellSize / 2;
+                    for (const r of roadRects) {
+                        if (x >= r.left - 1 && x <= r.right + 1 && y >= r.top - 1 && y <= r.bottom + 1) return true;
+                    }
+                    return false;
+                };
+
+                const toCell = (x, y) => ({ cx: Math.max(0, Math.min(cols - 1, Math.floor(x / cellSize))), cy: Math.max(0, Math.min(rows - 1, Math.floor(y / cellSize))) });
+                const start = toCell(fX, fY);
+                const goal = toCell(tX, tY);
+
+                // Find nearest road cell for start/goal if not on road
+                const findNearestRoadCell = (cell) => {
+                    if (isRoadCell(cell.cx, cell.cy)) return cell;
+                    const maxR = Math.max(cols, rows);
+                    for (let r = 1; r < maxR; r++) {
+                        for (let dx = -r; dx <= r; dx++) {
+                            for (let dy = -r; dy <= r; dy++) {
+                                const nx = cell.cx + dx, ny = cell.cy + dy;
+                                if (nx < 0 || ny < 0 || nx >= cols || ny >= rows) continue;
+                                if (isRoadCell(nx, ny)) return { cx: nx, cy: ny };
+                            }
+                        }
+                    }
+                    return null;
+                };
+
+                const sCell = findNearestRoadCell(start);
+                const gCell = findNearestRoadCell(goal);
+                if (!sCell || !gCell) {
+                    // No road path available
+                    vehicle.remove();
+                    return false;
+                }
+
+                // A* pathfinding (8-neighbors)
+                const key = (c) => `${c.cx},${c.cy}`;
+                const open = new Map();
+                const closed = new Set();
+                const parents = new Map();
+                const gScore = new Map();
+                const fScore = new Map();
+
+                const startKey = key(sCell); const goalKey = key(gCell);
+                gScore.set(startKey, 0);
+                const h = (a, b) => Math.hypot(a.cx - b.cx, a.cy - b.cy);
+                fScore.set(startKey, h(sCell, gCell));
+                open.set(startKey, sCell);
+
+                const neighbors = (c) => {
+                    const out = [];
+                    for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
+                        if (dx === 0 && dy === 0) continue;
+                        const nx = c.cx + dx, ny = c.cy + dy;
+                        if (nx < 0 || ny < 0 || nx >= cols || ny >= rows) continue;
+                        if (!isRoadCell(nx, ny)) continue;
+                        out.push({ cx: nx, cy: ny });
+                    }
+                    return out;
+                };
+
+                while (open.size > 0) {
+                    // pick node in open with lowest fScore
+                    let currentKey = null; let current = null; let bestF = Infinity;
+                    for (const [k, v] of open) {
+                        const fs = fScore.get(k) || Infinity;
+                        if (fs < bestF) { bestF = fs; currentKey = k; current = v; }
+                    }
+                    if (!current) break;
+
+                    if (currentKey === goalKey) break;
+
+                    open.delete(currentKey);
+                    closed.add(currentKey);
+
+                    for (const nb of neighbors(current)) {
+                        const nbKey = key(nb);
+                        if (closed.has(nbKey)) continue;
+                        const tentativeG = (gScore.get(currentKey) || Infinity) + Math.hypot(nb.cx - current.cx, nb.cy - current.cy);
+                        if (!open.has(nbKey) || tentativeG < (gScore.get(nbKey) || Infinity)) {
+                            parents.set(nbKey, currentKey);
+                            gScore.set(nbKey, tentativeG);
+                            fScore.set(nbKey, tentativeG + h(nb, gCell));
+                            open.set(nbKey, nb);
+                        }
+                    }
+                }
+
+                // reconstruct path
+                if (!parents.has(goalKey) && startKey !== goalKey) {
+                    // no path
+                    vehicle.remove();
+                    return false;
+                }
+
+                const path = [];
+                let curK = goalKey;
+                if (startKey === goalKey) path.push(sCell);
+                else {
+                    while (curK) {
+                        const parts = curK.split(',');
+                        path.push({ cx: Number(parts[0]), cy: Number(parts[1]) });
+                        if (curK === startKey) break;
+                        curK = parents.get(curK);
+                        if (!curK) break;
+                    }
+                    path.reverse();
+                }
+
+                // convert path to real coordinates (center of cell)
+                const coords = path.map(p => ({ x: p.cx * cellSize + cellSize / 2, y: p.cy * cellSize + cellSize / 2 }));
+                // ensure first/last match exact positions (enter/exit road)
+                if (coords.length > 0) {
+                    coords[0] = { x: fX, y: fY };
+                    coords[coords.length - 1] = { x: tX, y: tY };
+                }
+
+                // Animate along coords with requestAnimationFrame
+                let idx = 0;
+                let startTime = null;
+                const totalLen = coords.reduce((acc, c, i) => { if (i === 0) return 0; const dx = c.x - coords[i-1].x; const dy = c.y - coords[i-1].y; return acc + Math.hypot(dx, dy); }, 0) || 1;
+                const duration = speedMs || GameSettings.EMERGENCY_VEHICLE_SPEED_MS;
+
+                const step = (timestamp) => {
+                    if (!startTime) startTime = timestamp;
+                    const elapsed = timestamp - startTime;
+                    const t = Math.min(1, elapsed / duration);
+                    // find distance along path to cover = t * totalLen
+                    const targetDist = t * totalLen;
+                    // walk segments to find position
+                    let acc = 0; let pos = { x: coords[coords.length-1].x, y: coords[coords.length-1].y };
+                    for (let i = 1; i < coords.length; i++) {
+                        const a = coords[i-1], b = coords[i];
+                        const seg = Math.hypot(b.x - a.x, b.y - a.y);
+                        if (acc + seg >= targetDist) {
+                            const remain = targetDist - acc;
+                            const ratio = seg === 0 ? 0 : remain / seg;
+                            pos.x = a.x + (b.x - a.x) * ratio;
+                            pos.y = a.y + (b.y - a.y) * ratio;
+                            break;
+                        }
+                        acc += seg;
+                    }
+                    vehicle.style.left = `${Math.round(pos.x)}px`;
+                    vehicle.style.top = `${Math.round(pos.y)}px`;
+                    // rotation
+                    const next = coords[Math.min(coords.length-1, Math.ceil(targetDist / (totalLen / Math.max(1, coords.length-1))) )];
+                    if (next) {
+                        const ang = Math.atan2(next.y - pos.y, next.x - pos.x) * 180 / Math.PI;
+                        if (!isNaN(ang)) vehicle.style.transform = `rotate(${ang + 180}deg)`;
+                    }
+
+                    if (t < 1) requestAnimationFrame(step);
+                    else {
+                        // finish
+                        EmergencyManager.resolveEmergency(toSlotId, type);
+                        vehicle.remove();
+                    }
+                };
+                requestAnimationFrame(step);
+                return true;
             }
         };
 
@@ -1990,10 +2217,16 @@
             },
             
             levelUp: () => {
+                // Prevent leveling beyond MAX_LEVEL
+                if (GameState.level >= GameSettings.MAX_LEVEL) {
+                    UIManager.showMessage(`Je hebt al het maximale Level ${GameSettings.MAX_LEVEL} bereikt!`, 'info');
+                    return;
+                }
+
                 GameState.level++;
                 GameState.xp -= GameState.nextLevelXp; // Restant XP meenemen
                 GameState.nextLevelXp = Math.floor(GameState.nextLevelXp * 1.75); // Steeds moeilijker (hoger dan voorheen)
-                
+
                 // Vier het feestje!
                 UIManager.showMessage(`LEVEL UP! Gefeliciteerd, je bent nu Level ${GameState.level}!`, 'levelup');
                 
@@ -2013,6 +2246,20 @@
                 
                 // Ververs menu om unlocks te tonen
                 UIManager.renderBuildMenu();
+
+                // If we've reached max level, give a small final reward and stop further unlocks
+                if (GameState.level >= GameSettings.MAX_LEVEL) {
+                    GameState.saldo += 25000; // final reward
+                    UIManager.showMessage('Je hebt Level 10 bereikt! Kleine beloning: €25.000 ontvangen.', 'levelup');
+                    if (GameState.sfx.levelup) {
+                        const now = Tone.now();
+                        GameState.sfx.levelup.triggerAttackRelease(['C5','E5','G5'], '2n', now);
+                    }
+                    confetti({ particleCount: 220, spread: 90, origin: { y: 0.6 } });
+                    // lock next-level unlocks by setting nextLevelXp very large
+                    GameState.nextLevelXp = Infinity;
+                }
+
                 GameLogic.saveGame();
             },
             // --------------------------------
@@ -2052,7 +2299,11 @@
                 let maintenanceTotal = 0;
                 for (const slotId in GameState.placedSlots) {
                     const b = BuildingTypes[GameState.placedSlots[slotId]];
-                    if (b) maintenanceTotal += Math.max(1, Math.floor((b.cost || 0) * GameSettings.MAINTENANCE_RATE));
+                    if (!b) continue;
+                    // base maintenance from cost
+                    maintenanceTotal += Math.max(1, Math.floor((b.cost || 0) * GameSettings.MAINTENANCE_RATE));
+                    // if building defines an explicit maintenancePerTick, add it
+                    if (b.maintenancePerTick) maintenanceTotal += Number(b.maintenancePerTick) || 0;
                 }
 
                 // --- NIEUW: Arbeiders-systeem (eenvoudig maar functioneel) ---
@@ -2130,9 +2381,36 @@
             handleSlotClick: (slotId) => {
                 if (GameState.activeEmergencies.some(e => e.slotId === slotId)) { UIManager.openModal('upgrade', slotId); return; }
                 const isOccupied = !!GameState.placedSlots[slotId];
-                if (GameState.isSloopMode && isOccupied) GameLogic.sloopBuilding(slotId);
-                else if (GameState.selectedBuilding && !isOccupied) GameLogic.placeBuilding(slotId, GameState.selectedBuilding);
-                else if (isOccupied) UIManager.openModal('upgrade', slotId);
+                const isIntersection = (() => { try { return GameLogic.isSlotIntersection(slotId); } catch (e) { return false; } })();
+
+                // Sloop mode
+                if (GameState.isSloopMode && isOccupied) { GameLogic.sloopBuilding(slotId); return; }
+
+                // If slot is an intersection and empty and player hasn't selected a building, auto-place a traffic light (if affordable)
+                if (!isOccupied && isIntersection && !GameState.selectedBuilding) {
+                    // Try to place traffic light directly
+                    GameLogic.placeBuilding(slotId, 'traffic_light_1');
+                    return;
+                }
+
+                // If player has selected a building, enforce intersection rules
+                if (GameState.selectedBuilding && !isOccupied) {
+                    // If selected building is traffic light but slot is not intersection -> block
+                    if (GameState.selectedBuilding === 'traffic_light_1' && !isIntersection) {
+                        UIManager.showMessage('Stoplicht kan alleen op een kruispunt geplaatst worden.', 'error');
+                        return;
+                    }
+                    // If slot is intersection and selected building is not traffic light -> block
+                    if (isIntersection && GameState.selectedBuilding !== 'traffic_light_1') {
+                        UIManager.showMessage('Op een kruispunt kun je alleen een verkeerslicht bouwen.', 'error');
+                        return;
+                    }
+                    GameLogic.placeBuilding(slotId, GameState.selectedBuilding);
+                    return;
+                }
+
+                // If occupied open upgrade modal
+                if (isOccupied) UIManager.openModal('upgrade', slotId);
             },
 
             placeBuilding: (slotId, type) => {
@@ -2141,7 +2419,10 @@
                 const { canPlace, reason } = GameLogic.checkPlacementResourceViability(building);
                 if (!canPlace) { UIManager.showMessage(reason, 'error'); return; }
 
-                // (Weg-connectie controle verwijderd zoals gevraagd)
+                // Enforce intersection rules: traffic lights only on intersections, other buildings not allowed on intersections
+                const isIntersection = (() => { try { return GameLogic.isSlotIntersection(slotId); } catch (e) { return false; } })();
+                if (isIntersection && type !== 'traffic_light_1') { UIManager.showMessage('Op kruispunten kun je alleen verkeerslichten bouwen.', 'error'); return; }
+                if (!isIntersection && type === 'traffic_light_1') { UIManager.showMessage('Stoplicht kan alleen geplaatst worden op een kruispunt.', 'error'); return; }
 
                 GameState.saldo -= building.cost;
                 GameState.placedSlots[slotId] = type;
@@ -2212,6 +2493,7 @@
                 if (!canUpgrade) { UIManager.showMessage(reason, 'error'); return; }
                 
                 // --- NIEUW: Check Lock ---
+                if ((nextBuilding.unlockLevel || 1) > GameSettings.MAX_LEVEL) { UIManager.showMessage('Deze upgrade is niet beschikbaar (boven Level 10).', 'error'); return; }
                 if (GameState.level < nextBuilding.unlockLevel) { UIManager.showMessage(`Level ${nextBuilding.unlockLevel} nodig!`, 'error'); return; }
 
                 GameState.saldo -= nextBuilding.cost;
@@ -2403,6 +2685,34 @@
                 return { x: parseInt(s.left, 10) + 40, y: parseInt(s.top, 10) + 40 };
             },
 
+            // Determine whether a slot is at an intersection (overlaps both a horizontal and vertical road)
+            isSlotIntersection: (slotId) => {
+                const s = ActualSlotsData.find(x => x.id === slotId);
+                if (!s) return false;
+                const slotX = parseInt(s.left, 10) + 40;
+                const slotY = parseInt(s.top, 10) + 40;
+                const boardRect = DOM.board.getBoundingClientRect();
+                const roads = Array.from(DOM.board.querySelectorAll('.road'));
+                if (roads.length === 0) return false;
+
+                let overlapsHorizontal = false;
+                let overlapsVertical = false;
+                for (const r of roads) {
+                    const rr = r.getBoundingClientRect();
+                    const left = rr.left - boardRect.left;
+                    const top = rr.top - boardRect.top;
+                    const right = left + rr.width;
+                    const bottom = top + rr.height;
+                    // Check if slot center inside this road rect (with small buffer)
+                    const buffer = 6;
+                    if (slotX >= left - buffer && slotX <= right + buffer && slotY >= top - buffer && slotY <= bottom + buffer) {
+                        if (r.classList.contains('horizontal')) overlapsHorizontal = true;
+                        if (r.classList.contains('vertical')) overlapsVertical = true;
+                    }
+                }
+                return overlapsHorizontal && overlapsVertical;
+            },
+
             findNearestService: (slotId, serviceType, maxRadius = 600) => {
                 const origin = GameLogic.getSlotPosition(slotId);
                 if (!origin) return null;
@@ -2418,6 +2728,25 @@
                     if (d < bestDist) { bestDist = d; best = sId; }
                 }
                 return bestDist <= maxRadius ? best : null;
+            },
+
+            // Count nearby traffic lights (new feature)
+            countNearbyTrafficLights: (slotId, radius = 200) => {
+                let origin = null;
+                // Prefer GameLogic.getSlotPosition if available, else UIManager
+                if (typeof GameLogic.getSlotPosition === 'function') origin = GameLogic.getSlotPosition(slotId);
+                if (!origin && typeof UIManager.getSlotPosition === 'function') origin = UIManager.getSlotPosition(slotId);
+                if (!origin) return 0;
+                let cnt = 0;
+                for (const sId in GameState.placedSlots) {
+                    const t = GameState.placedSlots[sId];
+                    if (!t) continue;
+                    if (!t.startsWith('traffic_light')) continue;
+                    const p = (typeof GameLogic.getSlotPosition === 'function') ? GameLogic.getSlotPosition(sId) : UIManager.getSlotPosition(sId);
+                    if (!p) continue;
+                    if (Math.hypot(origin.x - p.x, origin.y - p.y) <= radius) cnt++;
+                }
+                return cnt;
             },
 
             isSlotConnectedToRoad: (slotId) => {
@@ -2455,10 +2784,23 @@
                 // Zoek naar het dichtstbijzijnde station binnen een bereik
                 const station = GameLogic.findNearestService(slotId, type, 700);
                 if (station) {
-                    UIManager.animateVehicle(station, slotId, type);
-                    UIManager.showMessage(`Noodgeval: ${type}! Hulp onderweg.`, 'emergency');
-                    GameState.activeEmergencies.push({ slotId, type, durationTicks: GameSettings.EMERGENCY_DURATION_TICKS, isDispatched: true });
-                    if (type === 'fire') ParticleManager.spawnSmokeAt(slotId, 6);
+                    // Speed boost when traffic lights are near station or target
+                    let speedMs = GameSettings.EMERGENCY_VEHICLE_SPEED_MS;
+                    try {
+                        const lightsNearby = (GameLogic.countNearbyTrafficLights(station, 220) || 0) + (GameLogic.countNearbyTrafficLights(slotId, 220) || 0);
+                        if (lightsNearby > 0) speedMs = Math.round(GameSettings.EMERGENCY_VEHICLE_SPEED_MS * 0.6); // 40% faster
+                    } catch (e) { /* ignore if helper unavailable */ }
+                    const started = UIManager.animateVehicle(station, slotId, type, speedMs);
+                    if (started) {
+                        UIManager.showMessage(`Noodgeval: ${type}! Hulp onderweg.`, 'emergency');
+                        GameState.activeEmergencies.push({ slotId, type, durationTicks: GameSettings.EMERGENCY_DURATION_TICKS, isDispatched: true });
+                        if (type === 'fire') ParticleManager.spawnSmokeAt(slotId, 6);
+                    } else {
+                        // Animatie kon niet starten (positie/probleem). Val terug op niet-verzonden status
+                        UIManager.showMessage(`Noodgeval: ${type}! Kon hulpvoertuig niet sturen (positie probleem).`, 'emergency');
+                        GameState.activeEmergencies.push({ slotId, type, durationTicks: GameSettings.EMERGENCY_DURATION_TICKS, isDispatched: false });
+                        if (type === 'fire') ParticleManager.spawnSmokeAt(slotId, 3);
+                    }
                 } else {
                     UIManager.showMessage(`Noodgeval: ${type}! Bouw een dienst binnen bereik!`, 'emergency');
                     GameState.activeEmergencies.push({ slotId, type, durationTicks: GameSettings.EMERGENCY_DURATION_TICKS, isDispatched: false });
@@ -2659,8 +3001,8 @@
                     if (dx !== 0 || dy !== 0) {
                         const curX = GameState.playerCar.x;
                         const curY = GameState.playerCar.y;
-                        const tentX = Math.max(0, Math.min(2500, curX + dx));
-                        const tentY = Math.max(0, Math.min(2000, curY + dy));
+                        const tentX = Math.max(0, Math.min(DOM.board.clientWidth, curX + dx));
+                        const tentY = Math.max(0, Math.min(DOM.board.clientHeight, curY + dy));
 
                         let appliedDX = 0, appliedDY = 0;
                         // allow full move if stays on road
@@ -2674,8 +3016,8 @@
                         }
 
                         if (appliedDX !== 0 || appliedDY !== 0) {
-                            GameState.playerCar.x = Math.max(0, Math.min(2500, curX + appliedDX));
-                            GameState.playerCar.y = Math.max(0, Math.min(2000, curY + appliedDY));
+                            GameState.playerCar.x = Math.max(0, Math.min(DOM.board.clientWidth, curX + appliedDX));
+                            GameState.playerCar.y = Math.max(0, Math.min(DOM.board.clientHeight, curY + appliedDY));
                             if (this.carEl) {
                                 this.carEl.style.left = `${Math.round(GameState.playerCar.x)}px`;
                                 this.carEl.style.top = `${Math.round(GameState.playerCar.y)}px`;
