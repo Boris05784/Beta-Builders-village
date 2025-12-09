@@ -1,6 +1,7 @@
 
 
 
+
 <!-- Builders village by Boris de Bruin -->
 <!DOCTYPE html>
 <html lang="nl">
@@ -449,24 +450,56 @@
             text-align: center;
         }
 
-        /* Wegen (nu pixel-based) */
+        /* Wegen (pixel-based) - verbeterde visuals */
         .road {
             position: absolute;
-            background-color: #4b5563;
-            /* Gray-700 */
-            border-top: 2px dashed #9ca3af;
-            /* Gray-400 */
-            border-bottom: 2px dashed #9ca3af;
-            opacity: 0.8;
+            background: linear-gradient(180deg, #2f3740 0%, #404851 100%);
+            /* road base */
+            border-radius: 10px;
+            box-shadow: 0 6px 10px rgba(15, 23, 42, 0.25) inset, 0 4px 8px rgba(0,0,0,0.12);
+            opacity: 0.95;
             z-index: 5;
-            /* Onder slots */
+            overflow: visible;
         }
 
+        /* Horizontal lane markings */
+        .road.horizontal {
+            background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.07) 0 6px, transparent 6px 28px),
+                              linear-gradient(180deg, #2f3740 0%, #404851 100%);
+            background-blend-mode: overlay;
+            height: 64px;
+        }
+
+        /* Vertical lane markings (rotated) */
         .road.vertical {
-            border-top: none;
-            border-bottom: none;
-            border-left: 2px dashed #9ca3af;
-            border-right: 2px dashed #9ca3af;
+            background-image: repeating-linear-gradient(0deg, rgba(255,255,255,0.07) 0 6px, transparent 6px 28px),
+                              linear-gradient(180deg, #2f3740 0%, #404851 100%);
+            background-blend-mode: overlay;
+            width: 64px;
+        }
+
+        /* center dashed line for horizontal roads */
+        .road.horizontal::after {
+            content: '';
+            position: absolute;
+            left: 0; right: 0; top: 50%; height: 2px;
+            margin-top: -1px;
+            background-image: linear-gradient(90deg, rgba(255,255,255,0.85) 0 20%, transparent 20% 40%);
+            background-size: 40px 2px;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        /* center dashed line for vertical roads */
+        .road.vertical::after {
+            content: '';
+            position: absolute;
+            top: 0; bottom: 0; left: 50%; width: 2px;
+            margin-left: -1px;
+            background-image: linear-gradient(180deg, rgba(255,255,255,0.85) 0 20%, transparent 20% 40%);
+            background-size: 2px 40px;
+            opacity: 0.7;
+            pointer-events: none;
         }
 
         /* Auto's (geüpdatet voor pixel-wegen) */
@@ -1189,13 +1222,66 @@
         // Helper om de exacte data na te bootsen op basis van de analyse van de vorige file:
         const generateOriginalGrid = () => {
              const list = [];
-             const addBlock = (startId, startX, startY, cols, rows) => {
-                 for(let r=0; r<rows; r++){
-                     for(let c=0; c<cols; c++){
-                         list.push({ id: `slot-${list.length+1}`, top: `${startY + (r*50)}px`, left: `${startX + (c*100)}px` });
-                     }
-                 }
-             };
+             // Flexible grid steps so slots align better with the pixel roads
+             const leftStep = 120; // horizontal spacing between slots
+             const topStep = 120;  // vertical spacing between slot rows
+             const slotW = 80, slotH = 80;
+            
+            // helper: simple AABB intersection
+            const intersects = (a, b) => !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
+
+            // build road rects from the inline road elements to avoid placing slots on roads
+            const boardEl = document.getElementById('board');
+            const boardW = (boardEl && boardEl.clientWidth) ? boardEl.clientWidth : 3500;
+            const boardH = (boardEl && boardEl.clientHeight) ? boardEl.clientHeight : 2600;
+            const roadEls = boardEl ? Array.from(boardEl.querySelectorAll('.road')) : [];
+            const roadRects = roadEls.map(r => {
+                const l = parseInt(r.style.left || '0', 10) || 0;
+                const t = parseInt(r.style.top || '0', 10) || 0;
+                const w = parseInt(r.style.width || r.style.minWidth || '0', 10) || parseInt(r.getAttribute('data-w')||'0',10) || (r.clientWidth||0);
+                const h = parseInt(r.style.height || r.style.minHeight || '0', 10) || parseInt(r.getAttribute('data-h')||'0',10) || (r.clientHeight||0);
+                return { left: l, top: t, right: l + w, bottom: t + h };
+            });
+
+            // Check whether a given rectangle collides with any road
+            const collidesRoad = (rect) => roadRects.some(rr => intersects(rect, rr));
+
+            // Check whether a given rectangle collides with existing slots
+            const collidesSlots = (rect, existing) => existing.some(s => intersects(rect, { left: s.x, top: s.y, right: s.x + slotW, bottom: s.y + slotH }));
+
+            const addBlock = (startId, startX, startY, cols, rows) => {
+                for(let r=0; r<rows; r++){
+                    for(let c=0; c<cols; c++){
+                        // initial position
+                        let nx = startX + (c*leftStep);
+                        let ny = startY + (r*topStep);
+
+                        // Bounds clamp
+                        if (nx < 0 || ny < 0 || nx + slotW > boardW || ny + slotH > boardH) continue;
+
+                        // Attempt to shift if collides with existing slots; try a few offsets
+                        const maxAttempts = 6;
+                        let attempt = 0;
+                        let placed = false;
+                        while (attempt < maxAttempts && !placed) {
+                            const rect = { left: nx, top: ny, right: nx + slotW, bottom: ny + slotH };
+                            if (collidesRoad(rect)) {
+                                // don't place on road; try nudging downward
+                                ny += topStep / 2;
+                            } else if (collidesSlots(rect, list)) {
+                                // shift horizontally first, then vertically if needed
+                                nx += leftStep / 2;
+                            } else {
+                                // free spot
+                                list.push({ id: `slot-${list.length+1}`, top: `${ny}px`, left: `${nx}px`, x: nx, y: ny });
+                                placed = true;
+                            }
+                            attempt++;
+                        }
+                        // if unable to place after attempts, skip this slot to avoid overlaps
+                    }
+                }
+            };
              // Blok 1 (Rij 1)
              addBlock(1, 100, 100, 5, 1); addBlock(6, 700, 100, 2, 1); addBlock(8, 1000, 100, 2, 1);
              addBlock(10, 1300, 100, 2, 1); addBlock(12, 1600, 100, 2, 1); addBlock(14, 1900, 100, 6, 1);
@@ -1221,8 +1307,8 @@
              addBlock(191, 100, 1800, 5, 2); addBlock(201, 700, 1800, 2, 2); addBlock(205, 1000, 1800, 2, 2);
              addBlock(209, 1300, 1800, 2, 2); addBlock(213, 1600, 1800, 2, 2); addBlock(217, 1900, 1800, 6, 2);
              // Uitbreiding: vul rechterkant en extra rijen voor grotere kaart
-             const extraXs = [2100, 2400, 2700, 3000];
-             const extraYs = [100, 350, 600, 800, 1000, 1300, 1550, 1800, 2050, 2300];
+             const extraXs = [2100, 2400, 2700, 3000, 3300];
+             const extraYs = [100, 260, 420, 580, 740, 900, 1060, 1220, 1380, 1540, 1700, 1860, 2020, 2180, 2340];
              for (const y of extraYs) {
                  for (const x of extraXs) {
                      // 2 kolommen per extra x (kleine cluster)
@@ -1287,6 +1373,27 @@
             'low_taxes_policy': {
                 id: 'low_taxes_policy', name: 'Lage Belastingen', description: 'Verlaag belastingen om bedrijvigheid te stimuleren (minder overheidsgeld).',
                 unlockLevel: 3, happinessBonus: 1, flatCostPerTick: 0, wasteMultiplier: 1.0, incomeMultiplier: 1.05
+            }
+            ,
+            'green_zones': {
+                id: 'green_zones', name: 'Groene Zones', description: 'Creëer meer parken en bomen — verhoogt geluk en vermindert vervuiling.',
+                unlockLevel: 2, happinessBonus: 4, flatCostPerTick: 50, wasteMultiplier: 0.95, incomeMultiplier: 1.00
+            },
+            'congestion_charge': {
+                id: 'congestion_charge', name: 'Drukteheffing', description: 'Heffing voor drukke wegen vermindert verkeer en genereert inkomsten.',
+                unlockLevel: 4, happinessBonus: -2, flatCostPerTick: -200, wasteMultiplier: 1.0, incomeMultiplier: 1.02
+            },
+            'renewable_subsidy': {
+                id: 'renewable_subsidy', name: 'Subsidie Hernieuwbaar', description: 'Subsidie voor zonnepanelen en windturbines — meer duurzame energie.',
+                unlockLevel: 3, happinessBonus: 2, flatCostPerTick: 150, wasteMultiplier: 1.0, incomeMultiplier: 1.00
+            },
+            'building_codes': {
+                id: 'building_codes', name: 'Bouwvoorschriften', description: 'Strengere bouwnormen verhogen veiligheid en geluk.',
+                unlockLevel: 5, happinessBonus: 3, flatCostPerTick: 0, wasteMultiplier: 0.98, incomeMultiplier: 0.99
+            },
+            'water_saving': {
+                id: 'water_saving', name: 'Waterbesparing', description: 'Stimuleer waterbesparing; vermindert watergebruik.',
+                unlockLevel: 2, happinessBonus: 1, flatCostPerTick: 20, wasteMultiplier: 1.0, incomeMultiplier: 1.00
             }
         };
 
