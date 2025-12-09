@@ -1,7 +1,6 @@
 
 
 
-
 <!-- Builders village by Boris de Bruin -->
 <!DOCTYPE html>
 <html lang="nl">
@@ -1243,6 +1242,39 @@
                 return { left: l, top: t, right: l + w, bottom: t + h };
             });
 
+            // Compute fixed intersection positions for traffic lights (center of vertical/horizontal road overlaps)
+            const horizRoads = roadEls.filter(r => r.classList.contains('horizontal')).map(r => ({
+                left: parseInt(r.style.left||'0',10)||0,
+                top: parseInt(r.style.top||'0',10)||0,
+                width: parseInt(r.style.width||'0',10)|| (r.clientWidth||0),
+                height: parseInt(r.style.height||'0',10)|| (r.clientHeight||0)
+            }));
+            const vertRoads = roadEls.filter(r => r.classList.contains('vertical')).map(r => ({
+                left: parseInt(r.style.left||'0',10)||0,
+                top: parseInt(r.style.top||'0',10)||0,
+                width: parseInt(r.style.width||'0',10)|| (r.clientWidth||0),
+                height: parseInt(r.style.height||'0',10)|| (r.clientHeight||0)
+            }));
+
+            const trafficSlots = [];
+            const seenTraffic = new Set();
+            horizRoads.forEach(h => {
+                vertRoads.forEach(v => {
+                    // intersection center
+                    const cx = Math.round(v.left + v.width/2 - slotW/2);
+                    const cy = Math.round(h.top + h.height/2 - slotH/2);
+                    // ensure within bounds
+                    if (cx < 0 || cy < 0 || cx + slotW > boardW || cy + slotH > boardH) return;
+                    const key = `${cx}:${cy}`;
+                    if (seenTraffic.has(key)) return; seenTraffic.add(key);
+                    const id = `traffic-slot-${trafficSlots.length+1}`;
+                    trafficSlots.push({ id, left: `${cx}px`, top: `${cy}px`, x: cx, y: cy });
+                });
+            });
+
+            // expose traffic slots globally so renderBoard and logic can use them
+            window.TrafficLightSlotsData = trafficSlots;
+
             // Check whether a given rectangle collides with any road
             const collidesRoad = (rect) => roadRects.some(rr => intersects(rect, rr));
 
@@ -1265,7 +1297,9 @@
                         let placed = false;
                         while (attempt < maxAttempts && !placed) {
                             const rect = { left: nx, top: ny, right: nx + slotW, bottom: ny + slotH };
-                            if (collidesRoad(rect)) {
+                            // also avoid colliding with reserved traffic slots
+                            const collidesTraffic = trafficSlots.some(ts => intersects(rect, { left: ts.x, top: ts.y, right: ts.x + slotW, bottom: ts.y + slotH }));
+                            if (collidesRoad(rect) || collidesTraffic) {
                                 // don't place on road; try nudging downward
                                 ny += topStep / 2;
                             } else if (collidesSlots(rect, list)) {
@@ -1307,14 +1341,16 @@
              addBlock(191, 100, 1800, 5, 2); addBlock(201, 700, 1800, 2, 2); addBlock(205, 1000, 1800, 2, 2);
              addBlock(209, 1300, 1800, 2, 2); addBlock(213, 1600, 1800, 2, 2); addBlock(217, 1900, 1800, 6, 2);
              // Uitbreiding: vul rechterkant en extra rijen voor grotere kaart
-             const extraXs = [2100, 2400, 2700, 3000, 3300];
-             const extraYs = [100, 260, 420, 580, 740, 900, 1060, 1220, 1380, 1540, 1700, 1860, 2020, 2180, 2340];
-             for (const y of extraYs) {
-                 for (const x of extraXs) {
-                     // 2 kolommen per extra x (kleine cluster)
-                     addBlock(0, x, y, 2, 1);
-                 }
-             }
+             const extraYs = [100, 350, 600, 800, 1000, 1300, 1550, 1800];
+            
+            // Tile a regular grid on the right side to match the left spacing
+            const rightStartX = 2100;
+            for (const y of extraYs) {
+                for (let x = rightStartX; x + slotW <= boardW; x += leftStep) {
+                    // place single-column blocks to create an even grid
+                    addBlock(0, x, y, 1, 1);
+                }
+            }
              return list;
         };
         const ActualSlotsData = generateOriginalGrid();
@@ -1578,6 +1614,34 @@
                 const resources = GameState;
 
                 ActualSlotsData.forEach(data => {
+                        // render reserved traffic-light slots first (fixed positions)
+                        if (window.TrafficLightSlotsData && window.TrafficLightSlotsData.length) {
+                            window.TrafficLightSlotsData.forEach(ts => {
+                                // avoid double-rendering if a regular slot has same id
+                                if (document.getElementById(ts.id)) return;
+                                const tslot = document.createElement('div');
+                                tslot.id = ts.id;
+                                tslot.className = 'slot intersection-slot traffic-slot reserved';
+                                tslot.style.top = ts.top;
+                                tslot.style.left = ts.left;
+                                tslot.dataset.slotId = ts.id;
+                                tslot.dataset.intersection = '1';
+                                tslot.dataset.trafficSlot = '1';
+                                tslot.style.zIndex = '22';
+                                // if a traffic light already placed here, show it
+                                const bType = GameState.placedSlots[ts.id];
+                                if (bType) {
+                                    tslot.classList.add('occupied');
+                                    const emojiSpan = document.createElement('span');
+                                    emojiSpan.textContent = BuildingTypes[bType]?.emoji || '🚦';
+                                    tslot.appendChild(emojiSpan);
+                                }
+                                tslot.addEventListener('click', (e) => { e.stopPropagation(); GameLogic.handleSlotClick(ts.id); });
+                                DOM.board.appendChild(tslot);
+                            });
+                            // ensure we only render reserved traffic slots once
+                            window._trafficSlotsRendered = true;
+                        }
                     const slot = document.createElement('div');
                     slot.id = data.id;
                     slot.className = 'slot';
@@ -2043,7 +2107,7 @@
 
                     <div class="p-4 bg-gray-50 rounded-lg border mb-6">
                         <h3 class="text-xl font-semibold text-gray-800 mb-2">Spel Informatie</h3>
-                        <p class="text-gray-700"><strong>Versie:</strong> v1.2.7</p>
+                        <p class="text-gray-700"><strong>Versie:</strong> v1.3.7</p>
                         <p class="text-gray-700"><strong>Laatste Update:</strong> 9-12-2025</p>
                         <p class="text-gray-700"><strong>📅 Publicatiedatum: 4-12-2025</p>
                         <p class="text-sm text-gray-500 mt-2">Builder’s Village door Boris de Bruin.</p>
@@ -2787,17 +2851,33 @@
 
             // --- NIEUWE HULPFUNCTIES ---
             getSlotPosition: (slotId) => {
-                const s = ActualSlotsData.find(x => x.id === slotId);
-                if (!s) return null;
-                return { x: parseInt(s.left, 10) + 40, y: parseInt(s.top, 10) + 40 };
+                let s = ActualSlotsData.find(x => x.id === slotId);
+                if (s) return { x: parseInt(s.left, 10) + 40, y: parseInt(s.top, 10) + 40 };
+                // check reserved traffic slots
+                if (window.TrafficLightSlotsData) {
+                    s = window.TrafficLightSlotsData.find(x => x.id === slotId);
+                    if (s) return { x: parseInt(s.left, 10) + 40, y: parseInt(s.top, 10) + 40 };
+                }
+                // fallback to DOM element
+                const el = document.getElementById(slotId);
+                if (el) return { x: parseInt(el.style.left || el.dataset.left || '0', 10) + 40, y: parseInt(el.style.top || el.dataset.top || '0', 10) + 40 };
+                return null;
             },
 
             // Determine whether a slot is at an intersection (overlaps both a horizontal and vertical road)
             isSlotIntersection: (slotId) => {
+                let slotX = null, slotY = null;
                 const s = ActualSlotsData.find(x => x.id === slotId);
-                if (!s) return false;
-                const slotX = parseInt(s.left, 10) + 40;
-                const slotY = parseInt(s.top, 10) + 40;
+                if (s) { slotX = parseInt(s.left, 10) + 40; slotY = parseInt(s.top, 10) + 40; }
+                else {
+                    // maybe it's a reserved traffic-slot rendered separately
+                    const el = document.getElementById(slotId);
+                    if (el) {
+                        slotX = parseInt(el.style.left || el.dataset.x || '0', 10) + 40;
+                        slotY = parseInt(el.style.top || el.dataset.y || '0', 10) + 40;
+                    }
+                }
+                if (slotX === null || slotY === null) return false;
                 const boardRect = DOM.board.getBoundingClientRect();
                 const roads = Array.from(DOM.board.querySelectorAll('.road'));
                 if (roads.length === 0) return false;
